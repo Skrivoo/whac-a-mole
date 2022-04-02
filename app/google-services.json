@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "196945603239",
+    "project_id": "whac-a-mole-12b1a",
+    "storage_bucket": "whac-a-mole-12b1a.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:196945603239:android:9dd7902996046cb44a8982",
+        "android_client_info": {
+          "package_name": "hu.skrivoo.whac_a_mole"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "196945603239-elgfd41q1n802sa1gd05ermjhu137hc0.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "hu.skrivoo.whac_a_mole",
+            "certificate_hash": "45e0a9fec8c8459775be2cd0bd0d0ea1d8e05a32"
+          }
+        },
+        {
+          "client_id": "196945603239-ikd8ja9970d4f7ikqobuv79ggctn5dbd.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDoVYiLqah1zwFK6MMKFZhwadxt42I44_8"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "196945603239-ikd8ja9970d4f7ikqobuv79ggctn5dbd.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

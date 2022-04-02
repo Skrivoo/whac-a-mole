@@ -1,6 +1,9 @@
 <resources>
     <string name="app_name">whac-a-mole</string>
-    <string name="login">Bejelentkezés</string>
+    <string name="login">Bejelentkezés Google fiókkal</string>
     <string name="user_name">Felhasználónév</string>
     <string name="password">Jelszó</string>
+    <string name="registration">Regisztráció</string>
+    <string name="START">start</string>
+    <string name="TOPLIST">toplist</string>
 </resources>
