@@ -7,4 +7,11 @@ public class Player {
     Integer highestScore;
     List<Integer> scoreList;
 
+    public Integer getHighestScore() {
+        return highestScore;
+    }
+
+    public List<Integer> getScoreList() {
+        return scoreList;
+    }
 }
