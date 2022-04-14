@@ -1,31 +1,21 @@
 package hu.skrivoo.whac_a_mole;
 
-import androidx.annotation.RequiresApi;
-import androidx.appcompat.app.AppCompatActivity;
-
 import android.annotation.SuppressLint;
 import android.content.SharedPreferences;
-import android.graphics.Bitmap;
-import android.graphics.Color;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.CountDownTimer;
-import android.view.MotionEvent;
 import android.view.View;
-import android.widget.ImageView;
 import android.widget.TextView;
+
+import androidx.annotation.RequiresApi;
+import androidx.appcompat.app.AppCompatActivity;
 
 import com.daimajia.androidanimations.library.Techniques;
 import com.daimajia.androidanimations.library.YoYo;
-import com.google.common.collect.RangeMap;
-import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.auth.FirebaseUser;
-import com.google.firebase.firestore.CollectionReference;
-import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Random;
 import java.util.concurrent.TimeUnit;
 
 public class GameActivity extends AppCompatActivity {
@@ -38,9 +28,6 @@ public class GameActivity extends AppCompatActivity {
     private List<Mole> moles;
     private CountDownTimer cTimer = null;
     private Integer currentScoreNumber = 0;
-    private FirebaseUser firebaseUser = null;
-    private FirebaseFirestore firebaseFirestore;
-    private CollectionReference collectionReference;
     private SharedPreferences sharedPreferences;
 
     @SuppressLint("ClickableViewAccessibility")
@@ -48,9 +35,6 @@ public class GameActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_game);
-        if (FirebaseAuth.getInstance().getCurrentUser() != null) {
-            firebaseUser = FirebaseAuth.getInstance().getCurrentUser();
-        }
         timeCounter = findViewById(R.id.timeCounter);
         topScore = findViewById(R.id.topScore);
         currentScore = findViewById(R.id.currentScore);
@@ -66,7 +50,7 @@ public class GameActivity extends AppCompatActivity {
 
     @SuppressLint("ClickableViewAccessibility")
     private List<Mole> initMoles() {
-        List <Mole> out = new LinkedList<>();
+        List<Mole> out = new LinkedList<>();
         out.add(new Mole(findViewById(R.id.mole_1)));
         out.add(new Mole(findViewById(R.id.mole_2)));
         out.add(new Mole(findViewById(R.id.mole_3)));
@@ -77,20 +61,24 @@ public class GameActivity extends AppCompatActivity {
 
     @RequiresApi(api = Build.VERSION_CODES.N)
     private void showUpMoles() {
-        Random r = new Random();
+        //Random r = new Random();
         //Mole actMole = moles.get(r.nextInt(moles.size()));
         Mole actMole = moles.stream().filter(mole -> !mole.isActive()).findAny().get();
         //moles.remove(actMole);
         showUpMole(actMole);
-        moleTimeCounter(3000, 100, actMole);
+        moleTimeCounter(3000, 300, actMole);
     }
 
     private void showUpMole(Mole mole) {
         YoYo.with(Techniques.SlideInUp)
-                .duration(200)
+                .duration(150)
                 .onStart(animator -> mole.getMoleView().setVisibility(View.VISIBLE))
+                .onCancel(animator -> {
+                    moleGoesAway(mole);
+                    currentScoreNumber++;
+                })
+                .onEnd(animator ->  mole.setActive(true))
                 .playOn(mole.getMoleView());
-        mole.setActive(true);
     }
 
     public void hitAMole(View view) {
@@ -102,27 +90,29 @@ public class GameActivity extends AppCompatActivity {
             }
         }
         if (mole.isActive()) {
-            mole.setActive(false);
+//            mole.setActive(false);
             currentScoreNumber++;
             setCurrentScoreValue();
             moleGoesAway(mole);
+
         }
     }
 
     private void moleGoesAway(Mole mole) {
-        YoYo.with(Techniques.FadeOutDown)
-                .duration(200)
+        YoYo.with(Techniques.SlideOutDown)
+                .duration(150)
                 .onEnd(
-                        animator -> mole.getMoleView().setVisibility(View.GONE)
+                        animator -> {
+                            mole.getMoleView().setVisibility(View.GONE);
+                            mole.setActive(false);
+                        }
                 )
                 .playOn(mole.getMoleView());
-        mole.setActive(false);
-        //moles.add(mole);
     }
 
     private void setHighestScoreValue() {
         int temp = 0;
-        if (firebaseUser != null) {
+        if (true) { //firebaseUser
             //Ha a user be van jelentkezve a google fiókjába akkor itt kiszedjük a topscore-t
             //ha nincs topscore vagy 0 akkor return 0
             temp = 0;
