@@ -117,8 +117,7 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintVertical_bias="0.187"
-        app:srcCompat="@drawable/mole"
-        tools:ignore="MissingConstraints" />
+        app:srcCompat="@drawable/mole" />
 
     <ImageView
         android:id="@+id/mole_2"
@@ -132,8 +131,7 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintVertical_bias="0.551"
-        app:srcCompat="@drawable/mole"
-        tools:ignore="MissingConstraints" />
+        app:srcCompat="@drawable/mole" />
 
     <ImageView
         android:id="@+id/mole_3"
@@ -148,8 +146,7 @@
         app:layout_constraintStart_toStartOf="@+id/imageView"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintVertical_bias="0.572"
-        app:srcCompat="@drawable/mole"
-        tools:ignore="MissingConstraints" />
+        app:srcCompat="@drawable/mole" />
 
     <ImageView
         android:id="@+id/mole_4"
@@ -164,8 +161,7 @@
         app:layout_constraintStart_toStartOf="@+id/imageView"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintVertical_bias="0.902"
-        app:srcCompat="@drawable/mole"
-        tools:ignore="MissingConstraints" />
+        app:srcCompat="@drawable/mole" />
 
     <ImageView
         android:id="@+id/mole_5"
@@ -179,7 +175,6 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintVertical_bias="0.902"
-        app:srcCompat="@drawable/mole"
-        tools:ignore="MissingConstraints" />
+        app:srcCompat="@drawable/mole" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

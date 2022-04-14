@@ -1,11 +1,13 @@
 package hu.skrivoo.whac_a_mole;
 
+import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.annotation.SuppressLint;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.Color;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.CountDownTimer;
 import android.view.MotionEvent;
@@ -33,24 +35,13 @@ public class GameActivity extends AppCompatActivity {
     private TextView timeCounter;
     private TextView topScore;
     private TextView currentScore;
-    private ImageView mole1;
-    private ImageView mole2;
-    private ImageView mole3;
-    private ImageView mole4;
-    private ImageView mole5;
-    private List<ImageView> moles;
+    private List<Mole> moles;
     private CountDownTimer cTimer = null;
     private Integer currentScoreNumber = 0;
     private FirebaseUser firebaseUser = null;
     private FirebaseFirestore firebaseFirestore;
     private CollectionReference collectionReference;
     private SharedPreferences sharedPreferences;
-    @SuppressLint("ClickableViewAccessibility")
-    private final View.OnTouchListener changeColorListener = (v, event) -> {
-        Bitmap bmp = Bitmap.createBitmap(v.getDrawingCache());
-        int color = bmp.getPixel((int) event.getX(), (int) event.getY());
-        return color == Color.TRANSPARENT;
-    };
 
     @SuppressLint("ClickableViewAccessibility")
     @Override
@@ -63,44 +54,70 @@ public class GameActivity extends AppCompatActivity {
         timeCounter = findViewById(R.id.timeCounter);
         topScore = findViewById(R.id.topScore);
         currentScore = findViewById(R.id.currentScore);
+        moles = initMoles();
         startGame();
     }
 
     private void startGame() {
-        initMoles();
         counter(60000, 1000);
         setHighestScoreValue();
         setCurrentScoreValue();
     }
 
+    @SuppressLint("ClickableViewAccessibility")
+    private List<Mole> initMoles() {
+        List <Mole> out = new LinkedList<>();
+        out.add(new Mole(findViewById(R.id.mole_1)));
+        out.add(new Mole(findViewById(R.id.mole_2)));
+        out.add(new Mole(findViewById(R.id.mole_3)));
+        out.add(new Mole(findViewById(R.id.mole_4)));
+        out.add(new Mole(findViewById(R.id.mole_5)));
+        return out;
+    }
+
+    @RequiresApi(api = Build.VERSION_CODES.N)
     private void showUpMoles() {
         Random r = new Random();
-        ImageView actMole = moles.get(r.nextInt(moles.size()));
-        moles.remove(actMole);
+        //Mole actMole = moles.get(r.nextInt(moles.size()));
+        Mole actMole = moles.stream().filter(mole -> !mole.isActive()).findAny().get();
+        //moles.remove(actMole);
         showUpMole(actMole);
         moleTimeCounter(3000, 100, actMole);
     }
 
-    private void showUpMole(View view) {
-        YoYo.with(Techniques.FadeInUp)
+    private void showUpMole(Mole mole) {
+        YoYo.with(Techniques.SlideInUp)
                 .duration(200)
-                .onStart(animator -> view.setVisibility(View.VISIBLE))
-                .playOn(view);
+                .onStart(animator -> mole.getMoleView().setVisibility(View.VISIBLE))
+                .playOn(mole.getMoleView());
+        mole.setActive(true);
     }
 
-    @SuppressLint("ClickableViewAccessibility")
-    private void initMoles() {
-        moles = new LinkedList<>();
-        moles.add(mole1 = findViewById(R.id.mole_1));
-        moles.add(mole2 = findViewById(R.id.mole_2));
-        moles.add(mole3 = findViewById(R.id.mole_3));
-        moles.add(mole4 = findViewById(R.id.mole_4));
-        moles.add(mole5 = findViewById(R.id.mole_5));
-        for (ImageView mole : moles) {
-            mole.setDrawingCacheEnabled(true);
-            mole.setOnTouchListener(changeColorListener);
-            mole.setVisibility(View.GONE);
+    public void hitAMole(View view) {
+        Mole mole = null;
+        for (Mole amole : moles) {
+            if (amole.getMoleView().getId() == view.getId()) {
+                mole = amole;
+                break;
+            }
         }
+        if (mole.isActive()) {
+            mole.setActive(false);
+            currentScoreNumber++;
+            setCurrentScoreValue();
+            moleGoesAway(mole);
+        }
+    }
+
+    private void moleGoesAway(Mole mole) {
+        YoYo.with(Techniques.FadeOutDown)
+                .duration(200)
+                .onEnd(
+                        animator -> mole.getMoleView().setVisibility(View.GONE)
+                )
+                .playOn(mole.getMoleView());
+        mole.setActive(false);
+        //moles.add(mole);
     }
 
     private void setHighestScoreValue() {
@@ -117,22 +134,6 @@ public class GameActivity extends AppCompatActivity {
         topScore.setText(String.valueOf(temp));
     }
 
-    public void hitAMole(View view) {
-        currentScoreNumber++;
-        setCurrentScoreValue();
-        moleGoesAway(view);
-    }
-
-    private void moleGoesAway(View view) {
-        YoYo.with(Techniques.FadeOutDown)
-                .duration(200)
-                .onEnd(
-                        animator -> view.setVisibility(View.GONE)
-                )
-                .playOn(view);
-        moles.add((ImageView) view);
-    }
-
     private void setCurrentScoreValue() {
         if (currentScore.getText().equals("currentScore")) {
             currentScore.setText(String.valueOf(0));
@@ -141,19 +142,20 @@ public class GameActivity extends AppCompatActivity {
         }
     }
 
-    private void moleTimeCounter(int total, int interval, View view) {
+    private void moleTimeCounter(int total, int interval, Mole mole) {
         cTimer = new CountDownTimer(total, interval) {
             public void onTick(long millisUntilFinished) {
             }
 
             public void onFinish() {
-                moleGoesAway(view);
+                moleGoesAway(mole);
             }
         }.start();
     }
 
     private void counter(int total, int interval) {
         cTimer = new CountDownTimer(total, interval) {
+            @RequiresApi(api = Build.VERSION_CODES.N)
             public void onTick(long millisUntilFinished) {
                 timeCounter.setText(String.valueOf(TimeUnit.MILLISECONDS.toSeconds(millisUntilFinished)));
                 if (moles.size() != 0) {
