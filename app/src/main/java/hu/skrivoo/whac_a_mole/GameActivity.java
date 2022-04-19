@@ -38,8 +38,18 @@ public class GameActivity extends AppCompatActivity {
         timeCounter = findViewById(R.id.timeCounter);
         topScore = findViewById(R.id.topScore);
         currentScore = findViewById(R.id.currentScore);
+        sharedPreferences = getApplicationContext().getSharedPreferences(PREFS_NAME, 0);
         moles = initMoles();
         startGame();
+    }
+
+    private void endGame() {
+        String topSaved = sharedPreferences.getString("topscore", "0");
+        if (Integer.parseInt(currentScore.getText().toString()) > Integer.parseInt(topSaved)) {
+            SharedPreferences.Editor editor = sharedPreferences.edit();
+            editor.putString("topscore", currentScoreNumber.toString());
+            editor.apply();
+        }
     }
 
     private void startGame() {
@@ -77,7 +87,7 @@ public class GameActivity extends AppCompatActivity {
                     moleGoesAway(mole);
                     currentScoreNumber++;
                 })
-                .onEnd(animator ->  mole.setActive(true))
+                .onEnd(animator -> mole.setActive(true))
                 .playOn(mole.getMoleView());
     }
 
@@ -90,7 +100,6 @@ public class GameActivity extends AppCompatActivity {
             }
         }
         if (mole.isActive()) {
-//            mole.setActive(false);
             currentScoreNumber++;
             setCurrentScoreValue();
             moleGoesAway(mole);
@@ -111,16 +120,9 @@ public class GameActivity extends AppCompatActivity {
     }
 
     private void setHighestScoreValue() {
-        int temp = 0;
-        if (true) { //firebaseUser
-            //Ha a user be van jelentkezve a google fiókjába akkor itt kiszedjük a topscore-t
-            //ha nincs topscore vagy 0 akkor return 0
-            temp = 0;
-        } else {
-            //local tárolt adatokat nézünk, ha itt van topsopre akkor az, ha nincs akkor get default 0
-            sharedPreferences = getApplicationContext().getSharedPreferences(PREFS_NAME, 0);
-            temp = sharedPreferences.getInt("topscore", 0);
-        }
+        String temp = "0";
+        //local tárolt adatokat nézünk, ha itt van topsopre akkor az, ha nincs akkor get default 0
+        temp = sharedPreferences.getString("topscore", "0");
         topScore.setText(String.valueOf(temp));
     }
 
@@ -154,6 +156,7 @@ public class GameActivity extends AppCompatActivity {
             }
 
             public void onFinish() {
+                endGame();
                 finish();
             }
         }.start();
