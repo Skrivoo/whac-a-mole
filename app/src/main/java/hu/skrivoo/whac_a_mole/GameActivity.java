@@ -7,6 +7,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.CountDownTimer;
 import android.os.Vibrator;
+import android.util.Log;
 import android.view.View;
 import android.widget.TextView;
 
@@ -15,6 +16,10 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import com.daimajia.androidanimations.library.Techniques;
 import com.daimajia.androidanimations.library.YoYo;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.QueryDocumentSnapshot;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -35,8 +40,10 @@ public class GameActivity extends AppCompatActivity {
     private SharedPreferences sharedPreferences;
     private Random r;
     private Vibrator vibe;
-    private  MediaPlayer mp;
-
+    private MediaPlayer mp;
+    private FirebaseFirestore db;
+    private FirebaseAuth mAuth;
+    private FirebaseUser currentUser;
 
     @SuppressLint("ClickableViewAccessibility")
     @Override
@@ -47,6 +54,10 @@ public class GameActivity extends AppCompatActivity {
         topScore = findViewById(R.id.topScore);
         currentScore = findViewById(R.id.currentScore);
         sharedPreferences = getApplicationContext().getSharedPreferences(PREFS_NAME, 0);
+        mAuth = FirebaseAuth.getInstance();
+        currentUser = mAuth.getCurrentUser();
+        Log.i(LOG_TAG, currentUser == null ? "anonim" : "bejelentkezve mint: " + currentUser.getDisplayName());
+        db = FirebaseFirestore.getInstance();
         r = new Random();
         vibe = (Vibrator) getSystemService(VIBRATOR_SERVICE);
         mp = MediaPlayer.create(this, R.raw.oof);
@@ -55,14 +66,39 @@ public class GameActivity extends AppCompatActivity {
     }
 
     private void endGame() {
-        String topSaved = sharedPreferences.getString("topscore", "0");
-        if (Integer.parseInt(currentScore.getText().toString()) > Integer.parseInt(topSaved)) {
-            SharedPreferences.Editor editor = sharedPreferences.edit();
-            editor.putString("topscore", currentScoreNumber.toString());
-            editor.apply();
-        }
+        //saveScore();
         mp.release();
     }
+
+    /*private void saveScore() {
+        if () { //be van lépve firebase-zel a felhasználó
+            // Create a new user with a first and last name
+            Map<String, Object> user = new HashMap<>();
+            user.put("topScore", 0);
+            user.put("allScore", listOfAllScore);
+            // Add a new document with a generated ID
+            db.collection("users")
+                    .add(user)
+                    .addOnSuccessListener(
+                            documentReference -> Log.d(
+                                    LOG_TAG, "DocumentSnapshot added with ID: " + documentReference.getId()
+                            )
+                    )
+                    .addOnFailureListener(new OnFailureListener() {
+                        @Override
+                        public void onFailure(@NonNull Exception e) {
+                            Log.w(LOG_TAG, "Error adding document", e);
+                        }
+                    });
+        } else {
+            String topSaved = sharedPreferences.getString("topscore", "0");
+            if (Integer.parseInt(currentScore.getText().toString()) > Integer.parseInt(topSaved)) {
+                SharedPreferences.Editor editor = sharedPreferences.edit();
+                editor.putString("topscore", currentScoreNumber.toString());
+                editor.apply();
+            }
+        }
+    }*/
 
     private void startGame() {
         counter(60000, 1000);
@@ -133,10 +169,24 @@ public class GameActivity extends AppCompatActivity {
     }
 
     private void setHighestScoreValue() {
-        String temp = "0";
-        //local tárolt adatokat nézünk, ha itt van topsopre akkor az, ha nincs akkor get default 0
-        temp = sharedPreferences.getString("topscore", "0");
-        topScore.setText(String.valueOf(temp));
+        if (false) { //be van lépve firebase-zel a felhasználó
+            db.collection("users")
+                    .get()
+                    .addOnCompleteListener(task -> {
+                        if (task.isSuccessful()) {
+                            for (QueryDocumentSnapshot document : task.getResult()) {
+                                Log.d(LOG_TAG, document.getId() + " => " + document.getData());
+                            }
+                        } else {
+                            Log.w(LOG_TAG, "Error getting documents.", task.getException());
+                        }
+                    });
+        } else {
+            String temp = "0";
+            //local tárolt adatokat nézünk, ha itt van topsopre akkor az, ha nincs akkor get default 0
+            temp = sharedPreferences.getString("topscore", "0");
+            topScore.setText(String.valueOf(temp));
+        }
     }
 
     private void setCurrentScoreValue() {
@@ -149,7 +199,9 @@ public class GameActivity extends AppCompatActivity {
 
     private void moleTimeCounter(int total, int interval, Mole mole) {
         cTimer = new CountDownTimer(total, interval) {
-            public void onTick(long millisUntilFinished) {}
+            public void onTick(long millisUntilFinished) {
+            }
+
             public void onFinish() {
                 moleGoesAway(mole);
             }

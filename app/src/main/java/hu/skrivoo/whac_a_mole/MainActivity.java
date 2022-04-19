@@ -1,9 +1,5 @@
 package hu.skrivoo.whac_a_mole;
 
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import androidx.appcompat.app.AppCompatActivity;
-
 import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.content.IntentSender;
@@ -12,8 +8,11 @@ import android.util.Log;
 import android.view.View;
 import android.widget.TextView;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.appcompat.app.AppCompatActivity;
+
 import com.google.android.gms.auth.api.identity.BeginSignInRequest;
-import com.google.android.gms.auth.api.identity.BeginSignInResult;
 import com.google.android.gms.auth.api.identity.Identity;
 import com.google.android.gms.auth.api.identity.SignInClient;
 import com.google.android.gms.auth.api.identity.SignInCredential;
@@ -22,7 +21,6 @@ import com.google.android.gms.common.SignInButton;
 import com.google.android.gms.common.api.ApiException;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
-import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthCredential;
 import com.google.firebase.auth.AuthResult;
@@ -38,20 +36,25 @@ public class MainActivity extends AppCompatActivity {
     private GoogleSignInClient googleSignInClient;
     private SignInClient oneTapClient;
     private BeginSignInRequest signInRequest;
+    private FirebaseUser currentUser;
     private static final int REQ_ONE_TAP = 2;  // Can be any integer unique to the Activity.
     private boolean showOneTapUI = true;
-    TextView isUserLoggedTextView;
-    SignInButton googleSignInButton;
+    private TextView isUserLoggedTextView;
+    private SignInButton googleSignInButton;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        isUserLoggedTextView = findViewById(R.id.isLoggedTextView);
         googleSignInButton = findViewById(R.id.googleSignInButton);
         googleSignInButton.setOnClickListener(this::signInWithGoogleAccount);
+        isUserLoggedTextView = findViewById(R.id.isLoggedTextView);
         firebaseAuth = FirebaseAuth.getInstance();
         oneTapClient = Identity.getSignInClient(this);
+        currentUser = firebaseAuth.getCurrentUser();
+        if (currentUser != null) {
+            updateUI(currentUser);
+        }
         signInRequest = BeginSignInRequest.builder()
                 .setPasswordRequestOptions(BeginSignInRequest.PasswordRequestOptions.builder()
                         .setSupported(true)
@@ -102,20 +105,24 @@ public class MainActivity extends AppCompatActivity {
                 }
                 break;
         }
+        currentUser = firebaseAuth.getCurrentUser();
     }
 
     @SuppressLint("SetTextI18n")
     private void updateUI(FirebaseUser user) {
-        if (!user.isAnonymous()) {
+        if (user != null) {
             isUserLoggedTextView.setText("Bejelentkezve, mint: " + user.getDisplayName());
+        } else {
+            isUserLoggedTextView.setText("Nincs bejelentkezve");
         }
     }
 
     public void signInWithGoogleAccount(View view) {
-        oneTapClient.beginSignIn(signInRequest)
-                .addOnSuccessListener(this, new OnSuccessListener<BeginSignInResult>() {
-                    @Override
-                    public void onSuccess(BeginSignInResult result) {
+        if (currentUser != null) {
+            FirebaseAuth.getInstance().signOut();
+        } else {
+            oneTapClient.beginSignIn(signInRequest)
+                    .addOnSuccessListener(this, result -> {
                         try {
                             startIntentSenderForResult(
                                     result.getPendingIntent().getIntentSender(), REQ_ONE_TAP,
@@ -123,16 +130,18 @@ public class MainActivity extends AppCompatActivity {
                         } catch (IntentSender.SendIntentException e) {
                             Log.e(LOG_TAG, "Couldn't start One Tap UI: " + e.getLocalizedMessage());
                         }
-                    }
-                })
-                .addOnFailureListener(this, new OnFailureListener() {
-                    @Override
-                    public void onFailure(@NonNull Exception e) {
-                        // No saved credentials found. Launch the One Tap sign-up flow, or
-                        // do nothing and continue presenting the signed-out UI.
-                        Log.d(LOG_TAG, e.getLocalizedMessage());
-                    }
-                });
+                    })
+                    .addOnFailureListener(this, new OnFailureListener() {
+                        @Override
+                        public void onFailure(@NonNull Exception e) {
+                            // No saved credentials found. Launch the One Tap sign-up flow, or
+                            // do nothing and continue presenting the signed-out UI.
+                            Log.d(LOG_TAG, e.getLocalizedMessage());
+                        }
+                    });
+        }
+        currentUser = firebaseAuth.getCurrentUser();
+        updateUI(currentUser);
     }
 
     public void startGame(View view) {
@@ -146,4 +155,9 @@ public class MainActivity extends AppCompatActivity {
         startActivity(intent);
     }
 
+    @Override
+    protected void onRestart() {
+        super.onRestart();
+        currentUser = firebaseAuth.getCurrentUser();
+    }
 }
