@@ -5,6 +5,7 @@ import android.content.SharedPreferences;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.CountDownTimer;
+import android.os.Vibrator;
 import android.view.View;
 import android.widget.TextView;
 
@@ -16,7 +17,9 @@ import com.daimajia.androidanimations.library.YoYo;
 
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Random;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 public class GameActivity extends AppCompatActivity {
 
@@ -29,6 +32,9 @@ public class GameActivity extends AppCompatActivity {
     private CountDownTimer cTimer = null;
     private Integer currentScoreNumber = 0;
     private SharedPreferences sharedPreferences;
+    private Random r;
+    private Vibrator vibe;
+
 
     @SuppressLint("ClickableViewAccessibility")
     @Override
@@ -39,6 +45,8 @@ public class GameActivity extends AppCompatActivity {
         topScore = findViewById(R.id.topScore);
         currentScore = findViewById(R.id.currentScore);
         sharedPreferences = getApplicationContext().getSharedPreferences(PREFS_NAME, 0);
+        r = new Random();
+        vibe = (Vibrator) getSystemService(VIBRATOR_SERVICE);
         moles = initMoles();
         startGame();
     }
@@ -71,15 +79,13 @@ public class GameActivity extends AppCompatActivity {
 
     @RequiresApi(api = Build.VERSION_CODES.N)
     private void showUpMoles() {
-        //Random r = new Random();
-        //Mole actMole = moles.get(r.nextInt(moles.size()));
-        Mole actMole = moles.stream().filter(mole -> !mole.isActive()).findAny().get();
-        //moles.remove(actMole);
-        showUpMole(actMole);
-        moleTimeCounter(3000, 300, actMole);
+        List<Mole> actMoles = moles.stream().filter(mole -> !mole.isActive()).collect(Collectors.toList());
+        Mole actualShowedUpMole = showUpMole(actMoles.get(r.nextInt(actMoles.size())));
+        moleTimeCounter(r.ints(1500, 3000).findFirst().getAsInt(),
+                r.ints(150, 300).findFirst().getAsInt(), actualShowedUpMole);
     }
 
-    private void showUpMole(Mole mole) {
+    private Mole showUpMole(Mole mole) {
         YoYo.with(Techniques.SlideInUp)
                 .duration(150)
                 .onStart(animator -> mole.getMoleView().setVisibility(View.VISIBLE))
@@ -89,6 +95,7 @@ public class GameActivity extends AppCompatActivity {
                 })
                 .onEnd(animator -> mole.setActive(true))
                 .playOn(mole.getMoleView());
+        return mole;
     }
 
     public void hitAMole(View view) {
@@ -100,6 +107,7 @@ public class GameActivity extends AppCompatActivity {
             }
         }
         if (mole.isActive()) {
+            vibe.vibrate(100);
             currentScoreNumber++;
             setCurrentScoreValue();
             moleGoesAway(mole);
@@ -136,9 +144,7 @@ public class GameActivity extends AppCompatActivity {
 
     private void moleTimeCounter(int total, int interval, Mole mole) {
         cTimer = new CountDownTimer(total, interval) {
-            public void onTick(long millisUntilFinished) {
-            }
-
+            public void onTick(long millisUntilFinished) {}
             public void onFinish() {
                 moleGoesAway(mole);
             }
