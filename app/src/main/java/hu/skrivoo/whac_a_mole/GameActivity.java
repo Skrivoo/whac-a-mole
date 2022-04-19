@@ -2,6 +2,7 @@ package hu.skrivoo.whac_a_mole;
 
 import android.annotation.SuppressLint;
 import android.content.SharedPreferences;
+import android.media.MediaPlayer;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.CountDownTimer;
@@ -34,6 +35,7 @@ public class GameActivity extends AppCompatActivity {
     private SharedPreferences sharedPreferences;
     private Random r;
     private Vibrator vibe;
+    private  MediaPlayer mp;
 
 
     @SuppressLint("ClickableViewAccessibility")
@@ -47,6 +49,7 @@ public class GameActivity extends AppCompatActivity {
         sharedPreferences = getApplicationContext().getSharedPreferences(PREFS_NAME, 0);
         r = new Random();
         vibe = (Vibrator) getSystemService(VIBRATOR_SERVICE);
+        mp = MediaPlayer.create(this, R.raw.oof);
         moles = initMoles();
         startGame();
     }
@@ -58,6 +61,7 @@ public class GameActivity extends AppCompatActivity {
             editor.putString("topscore", currentScoreNumber.toString());
             editor.apply();
         }
+        mp.release();
     }
 
     private void startGame() {
@@ -108,6 +112,7 @@ public class GameActivity extends AppCompatActivity {
         }
         if (mole.isActive()) {
             vibe.vibrate(100);
+            mp.start();
             currentScoreNumber++;
             setCurrentScoreValue();
             moleGoesAway(mole);
