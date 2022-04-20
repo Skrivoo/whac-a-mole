@@ -20,7 +20,6 @@ import com.google.android.gms.auth.api.signin.GoogleSignInClient;
 import com.google.android.gms.common.SignInButton;
 import com.google.android.gms.common.api.ApiException;
 import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthCredential;
 import com.google.firebase.auth.AuthResult;
@@ -131,13 +130,10 @@ public class MainActivity extends AppCompatActivity {
                             Log.e(LOG_TAG, "Couldn't start One Tap UI: " + e.getLocalizedMessage());
                         }
                     })
-                    .addOnFailureListener(this, new OnFailureListener() {
-                        @Override
-                        public void onFailure(@NonNull Exception e) {
-                            // No saved credentials found. Launch the One Tap sign-up flow, or
-                            // do nothing and continue presenting the signed-out UI.
-                            Log.d(LOG_TAG, e.getLocalizedMessage());
-                        }
+                    .addOnFailureListener(this, e -> {
+                        // No saved credentials found. Launch the One Tap sign-up flow, or
+                        // do nothing and continue presenting the signed-out UI.
+                        Log.d(LOG_TAG, e.getLocalizedMessage());
                     });
         }
         currentUser = firebaseAuth.getCurrentUser();

@@ -18,11 +18,15 @@ import com.daimajia.androidanimations.library.Techniques;
 import com.daimajia.androidanimations.library.YoYo;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.firestore.CollectionReference;
+import com.google.firebase.firestore.DocumentReference;
+import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
-import com.google.firebase.firestore.QueryDocumentSnapshot;
 
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.Random;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
@@ -44,9 +48,12 @@ public class GameActivity extends AppCompatActivity {
     private FirebaseFirestore db;
     private FirebaseAuth mAuth;
     private FirebaseUser currentUser;
+    private List<Integer> listOfAllScore;
+    private Integer topScoreAtFireStore;
 
     @SuppressLint("ClickableViewAccessibility")
     @Override
+    @RequiresApi(api = Build.VERSION_CODES.N)
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_game);
@@ -65,31 +72,31 @@ public class GameActivity extends AppCompatActivity {
         startGame();
     }
 
+    @RequiresApi(api = Build.VERSION_CODES.N)
     private void endGame() {
-        //saveScore();
-        mp.release();
+        saveScore();
     }
 
-    /*private void saveScore() {
-        if () { //be van lépve firebase-zel a felhasználó
-            // Create a new user with a first and last name
+    @RequiresApi(api = Build.VERSION_CODES.N)
+    private void saveScore() {
+        if (mAuth.getCurrentUser() != null) { //be van lépve firebase-zel a felhasználó
+            CollectionReference collection = db.collection(currentUser.getUid());
             Map<String, Object> user = new HashMap<>();
-            user.put("topScore", 0);
+            listOfAllScore.add(Integer.parseInt(currentScore.getText().toString()));
+            if (Integer.parseInt(currentScore.getText().toString()) > topScoreAtFireStore) {
+                topScoreAtFireStore = Integer.parseInt(currentScore.getText().toString());
+            }
+            user.put("topScore", topScoreAtFireStore);
             user.put("allScore", listOfAllScore);
-            // Add a new document with a generated ID
-            db.collection("users")
+            collection.document("scores").set(user);
+            /*db.collection(currentUser.getUid())
                     .add(user)
                     .addOnSuccessListener(
                             documentReference -> Log.d(
                                     LOG_TAG, "DocumentSnapshot added with ID: " + documentReference.getId()
                             )
                     )
-                    .addOnFailureListener(new OnFailureListener() {
-                        @Override
-                        public void onFailure(@NonNull Exception e) {
-                            Log.w(LOG_TAG, "Error adding document", e);
-                        }
-                    });
+                    .addOnFailureListener(e -> Log.w(LOG_TAG, "Error adding document", e));*/
         } else {
             String topSaved = sharedPreferences.getString("topscore", "0");
             if (Integer.parseInt(currentScore.getText().toString()) > Integer.parseInt(topSaved)) {
@@ -98,7 +105,8 @@ public class GameActivity extends AppCompatActivity {
                 editor.apply();
             }
         }
-    }*/
+        finish();
+    }
 
     private void startGame() {
         counter(60000, 1000);
@@ -169,17 +177,32 @@ public class GameActivity extends AppCompatActivity {
     }
 
     private void setHighestScoreValue() {
-        if (false) { //be van lépve firebase-zel a felhasználó
-            db.collection("users")
+        if (mAuth.getCurrentUser() != null) { //be van lépve firebase-zel a felhasználó
+            DocumentReference scores = db.collection(currentUser.getUid()).document("scores");
+            scores
                     .get()
                     .addOnCompleteListener(task -> {
                         if (task.isSuccessful()) {
-                            for (QueryDocumentSnapshot document : task.getResult()) {
-                                Log.d(LOG_TAG, document.getId() + " => " + document.getData());
+                            DocumentSnapshot document = task.getResult();
+                            if (document.exists()) {
+                                listOfAllScore = (List<Integer>) document.get("allScore");
+                                topScoreAtFireStore = Integer.parseInt(document.get("topScore").toString());
+                                Log.d(LOG_TAG, "DocumentSnapshot data: " + document.getData());
+                            } else {
+                                Map<String, Object> user = new HashMap<>();
+                                listOfAllScore = new LinkedList<Integer>();
+                                topScoreAtFireStore = 0;
+                                user.put("topScore", topScoreAtFireStore);
+                                user.put("allScore", listOfAllScore);
+                                db.collection(currentUser.getUid()).document("scores").set(user);
+                                Log.d(LOG_TAG, "No such document, making new one");
                             }
                         } else {
-                            Log.w(LOG_TAG, "Error getting documents.", task.getException());
+                            Log.d(LOG_TAG, "get failed with ", task.getException());
                         }
+                        task.addOnCompleteListener(runnable -> {
+                            topScore.setText(String.valueOf(topScoreAtFireStore));
+                        });
                     });
         } else {
             String temp = "0";
@@ -218,9 +241,9 @@ public class GameActivity extends AppCompatActivity {
                 }
             }
 
+            @RequiresApi(api = Build.VERSION_CODES.N)
             public void onFinish() {
                 endGame();
-                finish();
             }
         }.start();
     }
@@ -233,6 +256,7 @@ public class GameActivity extends AppCompatActivity {
     @Override
     protected void onDestroy() {
         cancelTimer();
+        mp.release();
         super.onDestroy();
     }
 
