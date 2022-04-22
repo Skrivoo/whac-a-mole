@@ -89,14 +89,6 @@ public class GameActivity extends AppCompatActivity {
             user.put("topScore", topScoreAtFireStore);
             user.put("allScore", listOfAllScore);
             collection.document("scores").set(user);
-            /*db.collection(currentUser.getUid())
-                    .add(user)
-                    .addOnSuccessListener(
-                            documentReference -> Log.d(
-                                    LOG_TAG, "DocumentSnapshot added with ID: " + documentReference.getId()
-                            )
-                    )
-                    .addOnFailureListener(e -> Log.w(LOG_TAG, "Error adding document", e));*/
         } else {
             String topSaved = sharedPreferences.getString("topscore", "0");
             if (Integer.parseInt(currentScore.getText().toString()) > Integer.parseInt(topSaved)) {
@@ -194,6 +186,7 @@ public class GameActivity extends AppCompatActivity {
                                 topScoreAtFireStore = 0;
                                 user.put("topScore", topScoreAtFireStore);
                                 user.put("allScore", listOfAllScore);
+                                user.put("user", mAuth.getCurrentUser()); //hozzácsatolom a firebase usert a player entitáshoz
                                 db.collection(currentUser.getUid()).document("scores").set(user);
                                 Log.d(LOG_TAG, "No such document, making new one");
                             }
