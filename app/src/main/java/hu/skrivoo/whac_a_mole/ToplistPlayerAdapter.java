@@ -6,7 +6,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
-
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -56,6 +55,7 @@ public class ToplistPlayerAdapter extends RecyclerView.Adapter<ToplistPlayerAdap
 
         public void bindTo(Player currentPlayer) {
             //avatar.setImageBitmap(currentPlayer.getFirebaseUser().getPhotoUrl());
+            //itt kell Glide.with()
             nameOfPlayer.setText(currentPlayer.getFirebaseUser().getDisplayName());
             higestScoreOfPlayer.setText(currentPlayer.getHighestScore());
         }

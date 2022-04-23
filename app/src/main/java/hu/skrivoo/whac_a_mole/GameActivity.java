@@ -74,7 +74,7 @@ public class GameActivity extends AppCompatActivity {
 
     @RequiresApi(api = Build.VERSION_CODES.N)
     private void endGame() {
-        saveScore();
+        saveScoreNewMet();
     }
 
     @RequiresApi(api = Build.VERSION_CODES.N)
@@ -100,9 +100,31 @@ public class GameActivity extends AppCompatActivity {
         finish();
     }
 
+    private void saveScoreNewMet() {
+        if (mAuth.getCurrentUser() != null) { //be van lépve firebase-zel a felhasználó
+            CollectionReference collection = db.collection("scores");
+            Map<String, Object> user = new HashMap<>();
+            listOfAllScore.add(Integer.parseInt(currentScore.getText().toString()));
+            if (Integer.parseInt(currentScore.getText().toString()) > topScoreAtFireStore) {
+                topScoreAtFireStore = Integer.parseInt(currentScore.getText().toString());
+            }
+            user.put("topScore", topScoreAtFireStore);
+            user.put("allScore", listOfAllScore);
+            collection.document(currentUser.getUid()).set(user);
+        } else {
+            String topSaved = sharedPreferences.getString("topscore", "0");
+            if (Integer.parseInt(currentScore.getText().toString()) > Integer.parseInt(topSaved)) {
+                SharedPreferences.Editor editor = sharedPreferences.edit();
+                editor.putString("topscore", currentScoreNumber.toString());
+                editor.apply();
+            }
+        }
+        finish();
+    }
+
     private void startGame() {
         counter(60000, 1000);
-        setHighestScoreValue();
+        setHighestScoreValueNewMet(); //próba
         setCurrentScoreValue();
     }
 
@@ -188,6 +210,42 @@ public class GameActivity extends AppCompatActivity {
                                 user.put("allScore", listOfAllScore);
                                 user.put("user", mAuth.getCurrentUser()); //hozzácsatolom a firebase usert a player entitáshoz
                                 db.collection(currentUser.getUid()).document("scores").set(user);
+                                Log.d(LOG_TAG, "No such document, making new one");
+                            }
+                        } else {
+                            Log.d(LOG_TAG, "get failed with ", task.getException());
+                        }
+                        task.addOnCompleteListener(runnable -> {
+                            topScore.setText(String.valueOf(topScoreAtFireStore));
+                        });
+                    });
+        } else {
+            String temp = "0";
+            //local tárolt adatokat nézünk, ha itt van topsopre akkor az, ha nincs akkor get default 0
+            temp = sharedPreferences.getString("topscore", "0");
+            topScore.setText(String.valueOf(temp));
+        }
+    }
+
+    private void setHighestScoreValueNewMet() {
+        if (mAuth.getCurrentUser() != null) { //be van lépve firebase-zel a felhasználó
+            DocumentReference scoresOfUser = db.collection("scores").document(currentUser.getUid());
+            scoresOfUser
+                    .get()
+                    .addOnCompleteListener(task -> {
+                        if (task.isSuccessful()) {
+                            DocumentSnapshot document = task.getResult();
+                            if (document.exists()) {
+                                listOfAllScore = (List<Integer>) document.get("allScore");
+                                topScoreAtFireStore = Integer.parseInt(document.get("topScore").toString());
+                                Log.d(LOG_TAG, "DocumentSnapshot data: " + document.getData());
+                            } else {
+                                Map<String, Object> user = new HashMap<>();
+                                listOfAllScore = new LinkedList<Integer>();
+                                topScoreAtFireStore = 0;
+                                user.put("topScore", topScoreAtFireStore);
+                                user.put("allScore", listOfAllScore);
+                                db.collection("scores").document(currentUser.getUid()).set(user);
                                 Log.d(LOG_TAG, "No such document, making new one");
                             }
                         } else {
