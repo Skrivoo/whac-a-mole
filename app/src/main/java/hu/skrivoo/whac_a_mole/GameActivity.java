@@ -60,7 +60,7 @@ public class GameActivity extends AppCompatActivity {
         currentUser = mAuth.getCurrentUser();
         Log.i(LOG_TAG, currentUser == null ? "anonim" : "bejelentkezve mint: " + currentUser.getDisplayName());
         db = FirebaseFirestore.getInstance();
-        playerDAO = new PlayerDAO();
+        playerDAO = new PlayerDAO(this);
         r = new Random();
         vibe = (Vibrator) getSystemService(VIBRATOR_SERVICE);
         mp = MediaPlayer.create(this, R.raw.oof);

@@ -63,4 +63,5 @@ public class Player {
     public void setScoreList(List<Integer> scoreList) {
         this.scoreList = scoreList;
     }
+
 }

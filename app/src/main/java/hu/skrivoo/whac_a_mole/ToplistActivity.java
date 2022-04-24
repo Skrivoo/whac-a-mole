@@ -1,67 +1,71 @@
 package hu.skrivoo.whac_a_mole;
 
+import android.annotation.SuppressLint;
 import android.os.Bundle;
 
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.firebase.firestore.CollectionReference;
-import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.Query;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 
 import java.util.ArrayList;
+import java.util.List;
 
 public class ToplistActivity extends AppCompatActivity {
 
     private static final String LOG_TAG = ToplistActivity.class.getName();
-    private FirebaseFirestore firestore;
     private CollectionReference players;
-    private ArrayList<Player> playerList;
+    public List<Player> playerList;
     private ToplistPlayerAdapter adapter;
     private RecyclerView recyclerView;
+    private PlayerDAO dao;
 
+    @SuppressLint("NotifyDataSetChanged")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_toplist);
         playerList = new ArrayList<>();
-        firestore = FirebaseFirestore.getInstance();
-        players = firestore.collection("scores");
+        dao = new PlayerDAO(this);
+        players = dao.getRef();
         players.orderBy("highestScore", Query.Direction.DESCENDING)
                 .limit(2)
                 .get()
                 .addOnSuccessListener(queryDocumentSnapshots -> {
-            for (QueryDocumentSnapshot doc : queryDocumentSnapshots) {
-                Player p = doc.toObject(Player.class);
-                playerList.add(p);
-            }
-        }).addOnCompleteListener(runnable -> {
+                    for (QueryDocumentSnapshot doc : queryDocumentSnapshots) {
+                        Player p = doc.toObject(Player.class);
+                        playerList.add(p);
+                    }
+                    adapter.notifyDataSetChanged();
+                }).addOnCompleteListener(runnable -> {
             for (Player p : playerList) {
                 System.out.println("legnagyobb: " + p.getHighestScore());
+                adapter.notifyDataSetChanged();
             }
         });
+        //orderingPlayers(2);
+
+
+        //playerList = dao.getPlayersOrderByHighscore(10);
+
+        adapter = new ToplistPlayerAdapter(this, playerList);
+        setContentView(R.layout.activity_toplist);
 
         recyclerView = findViewById(R.id.recyclerview);
-        recyclerView.setLayoutManager(new LinearLayoutManager(this));
-        adapter = new ToplistPlayerAdapter(this, playerList);
-        //pullDataFromFirestore();
+        recyclerView.setLayoutManager(new GridLayoutManager(this, 1));
+
+
+        recyclerView.setAdapter(adapter);
+
 
     }
 
-    private void pullDataFromFirestore() {
-        firestore.collection("scores").get().addOnCompleteListener(task -> {
+    @SuppressLint("NotifyDataSetChanged")
+    private void orderingPlayers(int limitnum) {
 
-            for (QueryDocumentSnapshot a : task.getResult()) {
-                playerList.add(a.toObject(Player.class));
-            }
-
-        });
-
-        firestore.collection("scores").orderBy("topScore", Query.Direction.DESCENDING).limit(10);
-
+        //adapter.notifyDataSetChanged();
     }
-
 
 }

@@ -49,7 +49,7 @@ public class MainActivity extends AppCompatActivity {
         firebaseAuth = FirebaseAuth.getInstance();
         oneTapClient = Identity.getSignInClient(this);
         currentUser = firebaseAuth.getCurrentUser();
-        dao = new PlayerDAO();
+        dao = new PlayerDAO(this);
         if (currentUser != null) {
             updateUI(currentUser);
         }
