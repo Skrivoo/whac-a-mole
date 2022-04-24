@@ -1,7 +1,6 @@
 package hu.skrivoo.whac_a_mole;
 
 import android.os.Bundle;
-import android.util.Log;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -29,29 +28,38 @@ public class ToplistActivity extends AppCompatActivity {
         setContentView(R.layout.activity_toplist);
         playerList = new ArrayList<>();
         firestore = FirebaseFirestore.getInstance();
-        players = firestore.collection("score");
-        players.orderBy("topScore", Query.Direction.DESCENDING)
-                .limit(10)
+        players = firestore.collection("scores");
+        players.orderBy("highestScore", Query.Direction.DESCENDING)
+                .limit(2)
                 .get()
                 .addOnSuccessListener(queryDocumentSnapshots -> {
             for (QueryDocumentSnapshot doc : queryDocumentSnapshots) {
                 Player p = doc.toObject(Player.class);
                 playerList.add(p);
             }
+        }).addOnCompleteListener(runnable -> {
+            for (Player p : playerList) {
+                System.out.println("legnagyobb: " + p.getHighestScore());
+            }
         });
-
-        for (Player p : playerList) {
-            Log.i(LOG_TAG, p.getFirebaseUser().getDisplayName() + " - " + p.getHighestScore());
-        }
 
         recyclerView = findViewById(R.id.recyclerview);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
         adapter = new ToplistPlayerAdapter(this, playerList);
-
+        //pullDataFromFirestore();
 
     }
 
     private void pullDataFromFirestore() {
+        firestore.collection("scores").get().addOnCompleteListener(task -> {
+
+            for (QueryDocumentSnapshot a : task.getResult()) {
+                playerList.add(a.toObject(Player.class));
+            }
+
+        });
+
+        firestore.collection("scores").orderBy("topScore", Query.Direction.DESCENDING).limit(10);
 
     }
 

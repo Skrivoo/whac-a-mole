@@ -1,19 +1,23 @@
 package hu.skrivoo.whac_a_mole;
 
-import com.google.firebase.auth.FirebaseUser;
+import android.net.Uri;
 
 import java.util.List;
 
 public class Player {
 
+    private String name;
+    private Uri avatar;
     private Integer highestScore;
     private List<Integer> scoreList;
-    private FirebaseUser firebaseUser;
+    private String uid;
 
-    public Player(Integer highestScore, List<Integer> scoreList, FirebaseUser firebaseUser) {
+    public Player(String name, Uri avatar, Integer highestScore, List<Integer> scoreList, String uid) {
         this.highestScore = highestScore;
         this.scoreList = scoreList;
-        this.firebaseUser = firebaseUser;
+        this.avatar = avatar;
+        this.name = name;
+        this.uid = uid;
     }
 
     public Player() {
@@ -23,11 +27,40 @@ public class Player {
         return highestScore;
     }
 
+
+    public void setHighestScore(Integer highestScore) {
+        this.highestScore = highestScore;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public Uri getAvatar() {
+        return avatar;
+    }
+
+    public void setAvatar(String avatar) {
+        this.avatar = Uri.parse(avatar);
+    }
+
+    public String getUid() {
+        return uid;
+    }
+
+    public void setUid(String uid) {
+        this.uid = uid;
+    }
+
     public List<Integer> getScoreList() {
         return scoreList;
     }
 
-    public FirebaseUser getFirebaseUser() {
-        return firebaseUser;
+    public void setScoreList(List<Integer> scoreList) {
+        this.scoreList = scoreList;
     }
 }

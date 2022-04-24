@@ -8,7 +8,6 @@ import android.util.Log;
 import android.view.View;
 import android.widget.TextView;
 
-import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
@@ -19,10 +18,7 @@ import com.google.android.gms.auth.api.identity.SignInCredential;
 import com.google.android.gms.auth.api.signin.GoogleSignInClient;
 import com.google.android.gms.common.SignInButton;
 import com.google.android.gms.common.api.ApiException;
-import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthCredential;
-import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.auth.GoogleAuthProvider;
@@ -40,6 +36,8 @@ public class MainActivity extends AppCompatActivity {
     private boolean showOneTapUI = true;
     private TextView isUserLoggedTextView;
     private SignInButton googleSignInButton;
+    public static Player player;
+    private PlayerDAO dao;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -51,6 +49,7 @@ public class MainActivity extends AppCompatActivity {
         firebaseAuth = FirebaseAuth.getInstance();
         oneTapClient = Identity.getSignInClient(this);
         currentUser = firebaseAuth.getCurrentUser();
+        dao = new PlayerDAO();
         if (currentUser != null) {
             updateUI(currentUser);
         }
@@ -60,49 +59,44 @@ public class MainActivity extends AppCompatActivity {
                         .build())
                 .setGoogleIdTokenRequestOptions(BeginSignInRequest.GoogleIdTokenRequestOptions.builder()
                         .setSupported(true)
-                        // Your server's client ID, not your Android client ID.
                         .setServerClientId("196945603239-ikd8ja9970d4f7ikqobuv79ggctn5dbd.apps.googleusercontent.com")
-                        // Only show accounts previously used to sign in.
                         .setFilterByAuthorizedAccounts(false)
                         .build())
-                // Automatically sign in when exactly one credential is retrieved.
                 .setAutoSelectEnabled(true)
                 .build();
+        getPlayerDataFromFirestore();
+    }
+
+    private void getPlayerDataFromFirestore() {
+        if (currentUser != null) {
+            dao.get(currentUser);
+        }
     }
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        switch (requestCode) {
-            case REQ_ONE_TAP:
-                try {
-                    SignInCredential googleCredential = oneTapClient.getSignInCredentialFromIntent(data);
-                    String idToken = googleCredential.getGoogleIdToken();
-                    if (idToken != null) {
-                        // Got an ID token from Google. Use it to authenticate
-                        // with Firebase.
-                        AuthCredential firebaseCredential = GoogleAuthProvider.getCredential(idToken, null);
-                        firebaseAuth.signInWithCredential(firebaseCredential)
-                                .addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
-                                    @Override
-                                    public void onComplete(@NonNull Task<AuthResult> task) {
-                                        if (task.isSuccessful()) {
-                                            // Sign in success, update UI with the signed-in user's information
-                                            Log.d(LOG_TAG, "signInWithCredential:success");
-                                            FirebaseUser user = firebaseAuth.getCurrentUser();
-                                            updateUI(user);
-                                        } else {
-                                            // If sign in fails, display a message to the user.
-                                            Log.w(LOG_TAG, "signInWithCredential:failure", task.getException());
-                                            updateUI(null);
-                                        }
-                                    }
-                                });
-                    }
-                } catch (ApiException e) {
-                    Log.e(LOG_TAG, "Baj van...");
+        if (requestCode == REQ_ONE_TAP) {
+            try {
+                SignInCredential googleCredential = oneTapClient.getSignInCredentialFromIntent(data);
+                String idToken = googleCredential.getGoogleIdToken();
+                if (idToken != null) {
+                    AuthCredential firebaseCredential = GoogleAuthProvider.getCredential(idToken, null);
+                    firebaseAuth.signInWithCredential(firebaseCredential)
+                            .addOnCompleteListener(this, task -> {
+                                if (task.isSuccessful()) {
+                                    Log.d(LOG_TAG, "signInWithCredential:success");
+                                    FirebaseUser user = firebaseAuth.getCurrentUser();
+                                    updateUI(user);
+                                } else {
+                                    Log.w(LOG_TAG, "signInWithCredential:failure", task.getException());
+                                    updateUI(null);
+                                }
+                            });
                 }
-                break;
+            } catch (ApiException e) {
+                Log.e(LOG_TAG, "Baj van...");
+            }
         }
         currentUser = firebaseAuth.getCurrentUser();
     }
@@ -131,12 +125,11 @@ public class MainActivity extends AppCompatActivity {
                         }
                     })
                     .addOnFailureListener(this, e -> {
-                        // No saved credentials found. Launch the One Tap sign-up flow, or
-                        // do nothing and continue presenting the signed-out UI.
                         Log.d(LOG_TAG, e.getLocalizedMessage());
                     });
         }
         currentUser = firebaseAuth.getCurrentUser();
+        getPlayerDataFromFirestore();
         updateUI(currentUser);
     }
 
@@ -156,4 +149,5 @@ public class MainActivity extends AppCompatActivity {
         super.onRestart();
         currentUser = firebaseAuth.getCurrentUser();
     }
+
 }
