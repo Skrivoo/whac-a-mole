@@ -1,45 +1,49 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+
+<androidx.cardview.widget.CardView
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:orientation="vertical"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <androidx.constraintlayout.widget.ConstraintLayout
+    <LinearLayout
 
         android:id="@+id/oneItemOfToplist"
         android:layout_width="match_parent"
         android:layout_height="50dp"
         android:layout_margin="10dp" >
 
-        <ImageView
-            android:id="@+id/higestScoreOfPlayer"
-            android:layout_width="wrap_content"
+        <TextView
+            android:id="@+id/numberOfPlace"
+            android:layout_width="40dp"
             android:layout_height="match_parent"
-            app:layout_constraintEnd_toStartOf="@id/topListPlayerAvatar"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintBottom_toBottomOf="parent" />
+            android:gravity="center"
+            android:textStyle="bold"
+            android:textSize="28dp"/>
 
-        <ImageView
+        <de.hdodenhof.circleimageview.CircleImageView
             android:id="@+id/topListPlayerAvatar"
-            android:layout_width="wrap_content"
-            android:layout_height="match_parent"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toStartOf="@+id/nameOfPlayer"
-            app:layout_constraintStart_toEndOf="@id/higestScoreOfPlayer"
-            app:layout_constraintTop_toTopOf="parent" />
+            android:layout_width="50dp"
+            android:layout_height="match_parent" />
 
         <TextView
             android:id="@+id/nameOfPlayer"
-            android:layout_width="wrap_content"
+            android:layout_width="240dp"
             android:layout_height="match_parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toEndOf="@id/topListPlayerAvatar"
-            app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintBottom_toBottomOf="parent"/>
+            android:gravity="center"
+            android:textStyle="bold"
+            android:textSize="24dp" />
+
+        <TextView
+            android:id="@+id/higestScoreOfPlayer"
+            android:layout_width="40dp"
+            android:layout_height="match_parent"
+            android:gravity="center"
+            android:textStyle="bold"
+            android:textSize="28dp"/>
 
 
-    </androidx.constraintlayout.widget.ConstraintLayout>
+    </LinearLayout>
 
-</LinearLayout>
+</androidx.cardview.widget.CardView>
