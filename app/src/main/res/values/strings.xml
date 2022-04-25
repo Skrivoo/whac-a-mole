@@ -7,4 +7,11 @@
     <string name="START">start</string>
     <string name="TOPLIST">toplist</string>
     <string name="Toplist">Toplist</string>
+    <string name="email">Email register / login</string>
+    <string name="login_w_email">Bejelentkezés email-lel</string>
+    <string name="email_address">Email-cím</string>
+    <string name="Jelszó">password</string>
+    <string name="password_again">Jelszó újra</string>
+    <string name="simple_login_text">Bejelentkezés</string>
+    <string name="delete_registration">Regisztráció törlése</string>
 </resources>

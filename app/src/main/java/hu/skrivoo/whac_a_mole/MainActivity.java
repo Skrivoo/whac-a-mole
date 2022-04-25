@@ -6,7 +6,9 @@ import android.content.IntentSender;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
+import android.widget.Button;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
@@ -38,6 +40,7 @@ public class MainActivity extends AppCompatActivity {
     private SignInButton googleSignInButton;
     public static Player player;
     private PlayerDAO dao;
+    private Button loginButton;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -46,6 +49,8 @@ public class MainActivity extends AppCompatActivity {
         googleSignInButton = findViewById(R.id.googleSignInButton);
         googleSignInButton.setOnClickListener(this::signInWithGoogleAccount);
         isUserLoggedTextView = findViewById(R.id.isLoggedTextView);
+        loginButton = findViewById(R.id.startEmailLoginOrRegister);
+        loginButton.setOnClickListener(this::startWithEmail);
         firebaseAuth = FirebaseAuth.getInstance();
         oneTapClient = Identity.getSignInClient(this);
         currentUser = firebaseAuth.getCurrentUser();
@@ -145,9 +150,26 @@ public class MainActivity extends AppCompatActivity {
     }
 
     @Override
+    public void onStart() {
+        super.onStart();
+        FirebaseUser currentUser = firebaseAuth.getCurrentUser();
+        if(currentUser != null){
+            updateUI(currentUser);
+        }
+    }
+
+    @Override
     protected void onRestart() {
         super.onRestart();
         currentUser = firebaseAuth.getCurrentUser();
     }
 
+    public void startWithEmail(View view) {
+        if (currentUser != null) {
+            Toast.makeText(this, "Már be vagy jelentkezve", Toast.LENGTH_LONG).show();
+        } else {
+            Intent intent = new Intent(this, LoginActivity.class);
+            startActivity(intent);
+        }
+    }
 }
