@@ -5,7 +5,8 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:orientation="vertical"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="70dp"
+    android:background="@color/brown">
 
     <LinearLayout
 
@@ -29,7 +30,7 @@
 
         <TextView
             android:id="@+id/nameOfPlayer"
-            android:layout_width="240dp"
+            android:layout_width="230dp"
             android:layout_height="match_parent"
             android:gravity="center"
             android:textStyle="bold"
@@ -37,7 +38,7 @@
 
         <TextView
             android:id="@+id/higestScoreOfPlayer"
-            android:layout_width="40dp"
+            android:layout_width="50dp"
             android:layout_height="match_parent"
             android:gravity="center"
             android:textStyle="bold"
