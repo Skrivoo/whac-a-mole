@@ -11,9 +11,7 @@
     <ImageView
         android:id="@+id/toplistDesignImage"
         android:layout_width="match_parent"
-        android:layout_height="100dp"
-        app:layout_constraintBottom_toTopOf="@+id/recyclerview"
-        app:layout_constraintTop_toTopOf="parent" />
+        android:layout_height="100dp" />
 
     <TextView
         android:layout_width="match_parent"
@@ -24,9 +22,7 @@
         android:textStyle="bold"
         android:fontFamily="@font/toplist_font"
         android:textColor="@color/red"
-        android:textSize="50dp"
-        app:layout_constraintBottom_toTopOf="@+id/recyclerview"
-        app:layout_constraintTop_toBottomOf="@+id/toplistDesignImage" />
+        android:textSize="50dp" />
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/recyclerview"
