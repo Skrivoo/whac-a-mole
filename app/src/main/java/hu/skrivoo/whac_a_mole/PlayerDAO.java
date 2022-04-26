@@ -92,4 +92,27 @@ public class PlayerDAO {
         db.document(uid).delete().addOnCompleteListener(task -> Toast.makeText(context, "User sikeresen törölve.", Toast.LENGTH_LONG).show());
     }
 
+    /**
+     * @param currentUser Firebase user to use uid
+     * @param field the field to be updated
+     * @param value the new value of field.
+     *              If value is "-1" -> delete allScore
+     *              if value is "0" -> delete highestScore
+     */
+    public void update(FirebaseUser currentUser, String field, String value) {
+        if (value.equals("-1")) {
+            db.document(currentUser.getUid()).update(
+                    field, new ArrayList<>()
+            );
+        } else if (value.equals("0")) {
+            db.document(currentUser.getUid()).update(
+                    field, 0
+            );
+        } else {
+            db.document(currentUser.getUid()).update(
+                    field, value
+            );
+        }
+    }
+
 }

@@ -17,4 +17,9 @@
     <string name="profile">profile</string>
     <string name="logout">kijelentkezés</string>
     <string name="edit_profile">profil módosítása</string>
+    <string name="modify_data">Adatok módósítása</string>
+    <string name="new_name">Új név</string>
+    <string name="url_of_new_avatar">Új avatar URL-je</string>
+    <string name="save_data">Adatok mentése</string>
+    <string name="reset_scores">Eredmények törlése</string>
 </resources>

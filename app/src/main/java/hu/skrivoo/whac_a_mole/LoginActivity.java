@@ -51,7 +51,8 @@ public class LoginActivity extends AppCompatActivity {
         if (mAuth.getCurrentUser() == null) {
             Toast.makeText(this, "Nem vagy bejelentkezve.", Toast.LENGTH_LONG).show();
         } else {
-            //TODO
+            Intent intent = new Intent(this, EditLoginActivity.class);
+            startActivity(intent);
         }
     }
 
