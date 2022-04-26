@@ -54,9 +54,6 @@ public class MainActivity extends AppCompatActivity {
         oneTapClient = Identity.getSignInClient(this);
         currentUser = firebaseAuth.getCurrentUser();
         dao = new PlayerDAO(this);
-        if (currentUser != null) {
-            updateUI();
-        }
         signInRequest = BeginSignInRequest.builder()
                 .setPasswordRequestOptions(BeginSignInRequest.PasswordRequestOptions.builder()
                         .setSupported(true)
@@ -72,9 +69,28 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void getPlayerDataFromFirestore() {
-        if (currentUser != null) {
-            dao.get(currentUser);
+        if (player == null) {
             updateUI();
+        }
+        if (currentUser != null) {
+            getPlayer(player -> {
+                MainActivity.player = player;
+                updateUI();
+            });
+        }
+    }
+
+    private void getPlayer(FirestoreCallback firestoreCallback) {
+        dao.get(currentUser, firestoreCallback);
+    }
+
+    @SuppressLint("SetTextI18n")
+    private void updateUI() {
+        if (currentUser != null) {
+            isUserLoggedTextView.setText("Bejelentkezve, mint: " + player.getName());
+        } else {
+            isUserLoggedTextView.setText("Nincs bejelentkezve");
+            player = new Player();
         }
     }
 
@@ -91,30 +107,16 @@ public class MainActivity extends AppCompatActivity {
                             .addOnCompleteListener(this, task -> {
                                 if (task.isSuccessful()) {
                                     Log.d(LOG_TAG, "signInWithCredential:success");
-                                    currentUser = firebaseAuth.getCurrentUser();
-                                    updateUI();
+                                    currentUser = FirebaseAuth.getInstance().getCurrentUser();
+                                    getPlayerDataFromFirestore();
                                 } else {
                                     Log.w(LOG_TAG, "signInWithCredential:failure", task.getException());
-                                    updateUI();
                                 }
                             });
                 }
             } catch (ApiException e) {
                 Log.e(LOG_TAG, "Baj van...");
             }
-        }
-        currentUser = firebaseAuth.getCurrentUser();
-    }
-
-    @SuppressLint("SetTextI18n")
-    private void updateUI() {
-        if (currentUser != null) {
-            if (player == null) {
-                dao.get(currentUser);
-            }
-            isUserLoggedTextView.setText("Bejelentkezve, mint: " + player.getName());
-        } else {
-            isUserLoggedTextView.setText("Nincs bejelentkezve");
         }
     }
 
@@ -134,11 +136,9 @@ public class MainActivity extends AppCompatActivity {
                     })
                     .addOnFailureListener(this, e -> {
                         Log.d(LOG_TAG, e.getLocalizedMessage());
-                    });
+                    }).addOnCompleteListener(task -> {
+            });
         }
-        currentUser = firebaseAuth.getCurrentUser();
-        getPlayerDataFromFirestore();
-        updateUI();
     }
 
     public void startGame(View view) {
@@ -155,19 +155,28 @@ public class MainActivity extends AppCompatActivity {
     @Override
     public void onStart() {
         super.onStart();
-        updateUI();
+        getPlayerDataFromFirestore();
+        //updateUI();
     }
 
     @Override
     protected void onPostResume() {
         super.onPostResume();
-        updateUI();
+        //updateUI();
+        getPlayerDataFromFirestore();
     }
 
     @Override
     protected void onRestart() {
         super.onRestart();
         currentUser = firebaseAuth.getCurrentUser();
+        getPlayerDataFromFirestore();
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        getPlayerDataFromFirestore();
     }
 
     public void startWithEmail(View view) {

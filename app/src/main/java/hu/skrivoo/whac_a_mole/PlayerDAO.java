@@ -31,26 +31,41 @@ public class PlayerDAO {
         return db.document(player.getUid()).set(player);
     }
 
-    public void get(FirebaseUser user) {
+    public void add(FirebaseUser user, FirestoreCallback firestoreCallback) {
+        Player p = new Player(user.getDisplayName(), user.getPhotoUrl(), 0, new ArrayList<Integer>(), user.getUid());
+        db.document(user.getUid()).set(p);
+        firestoreCallback.onCallback(p);
+    }
+
+    public void get(FirebaseUser user, FirestoreCallback firestoreCallback) {
         DocumentReference docRef = db.document(user.getUid());
-        docRef.get()
-                .addOnSuccessListener(
+        docRef.get().addOnCompleteListener(task -> {
+            if (task.isSuccessful() && task.getResult().exists()) {
+                firestoreCallback.onCallback(task.getResult().toObject(Player.class));
+            } else {
+                add(user, firestoreCallback);
+            }
+        });
+
+
+
+
+                /*.addOnSuccessListener(
                         documentSnapshot -> {
                             if (documentSnapshot.exists()) {
                                 MainActivity.player = documentSnapshot.toObject(Player.class);
                             } else {
-                                String name = "";
+                                *//*String name = "";
                                 if (user.getDisplayName() == null || user.getDisplayName().equals(""))
-                                MainActivity.player = new Player(user.getDisplayName(), user.getPhotoUrl(), 0, new ArrayList<Integer>(), user.getUid());
-                                add(MainActivity.player).addOnSuccessListener(unused -> {
+                                add(p).addOnSuccessListener(unused -> {
                                     Toast.makeText(context, "Játékos létrehozva", Toast.LENGTH_LONG).show();
                                 }).addOnFailureListener(q -> {
                                     Toast.makeText(context, "Player error: " + q.getMessage(), Toast.LENGTH_LONG).show();
-                                });
+                                });*//*
                             }
                         })
                 .addOnFailureListener(e -> {
-                });
+                });*/
     }
 
     public List<Player> getAll() {

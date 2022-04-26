@@ -77,7 +77,7 @@ public class LoginActivity extends AppCompatActivity {
                         if (task.isSuccessful()) {
                             dao.delete(uid, this);
                             Log.d(LOG_TAG, "User account deleted.");
-                            //Toast.makeText(this, "Profil sikeresen törölve.", Toast.LENGTH_LONG).show();
+                            MainActivity.player = null;
                         }
                     });
         }
@@ -99,9 +99,14 @@ public class LoginActivity extends AppCompatActivity {
                         if (task.isSuccessful()) {
                             Log.d(LOG_TAG, "signInWithEmail:success");
                             FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
-                            dao.get(user);
-                            Intent intent = new Intent(LoginActivity.this, MainActivity.class);
-                            startActivity(intent);
+                            dao.get(user, new FirestoreCallback() {
+                                @Override
+                                public void onCallback(Player player) {
+                                    MainActivity.player = player;
+                                    Intent intent = new Intent(LoginActivity.this, MainActivity.class);
+                                    startActivity(intent);
+                                }
+                            });
                         } else {
                             Log.w(LOG_TAG, "signInWithEmail:failure", task.getException());
                             Toast.makeText(LoginActivity.this, "Sikertelen belépés",
