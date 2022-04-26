@@ -24,6 +24,8 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.auth.GoogleAuthProvider;
 
+import java.util.List;
+
 
 public class MainActivity extends AppCompatActivity {
 
@@ -73,9 +75,17 @@ public class MainActivity extends AppCompatActivity {
             updateUI();
         }
         if (currentUser != null) {
-            getPlayer(player -> {
-                MainActivity.player = player;
-                updateUI();
+            getPlayer(new FirestoreCallback() {
+                @Override
+                public void onCallbackOne(Player player) {
+                    MainActivity.player = player;
+                    updateUI();
+                }
+
+                @Override
+                public void onCallbackMore(List<Player> players) {
+
+                }
             });
         }
     }
@@ -156,13 +166,11 @@ public class MainActivity extends AppCompatActivity {
     public void onStart() {
         super.onStart();
         getPlayerDataFromFirestore();
-        //updateUI();
     }
 
     @Override
     protected void onPostResume() {
         super.onPostResume();
-        //updateUI();
         getPlayerDataFromFirestore();
     }
 

@@ -17,11 +17,9 @@ import java.util.List;
 
 public class ToplistPlayerAdapter extends RecyclerView.Adapter<ToplistPlayerAdapter.ViewHolder> {
 
-    private final List<Player> playerArrayList;
-    private final List<Player> playerArrayListAll;
-    @SuppressLint("StaticFieldLeak")
+    private List<Player> playerArrayList;
+    private List<Player> playerArrayListAll;
     private Context context;
-    private final int lastPos = -1;
 
     ToplistPlayerAdapter(Context context, List<Player> playerList) {
         this.playerArrayList = playerList;

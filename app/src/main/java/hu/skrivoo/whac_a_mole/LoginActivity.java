@@ -14,6 +14,8 @@ import androidx.appcompat.app.AppCompatActivity;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 
+import java.util.List;
+
 public class LoginActivity extends AppCompatActivity {
 
     private static final String LOG_TAG = LoginActivity.class.getName();
@@ -101,10 +103,15 @@ public class LoginActivity extends AppCompatActivity {
                             FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
                             dao.get(user, new FirestoreCallback() {
                                 @Override
-                                public void onCallback(Player player) {
+                                public void onCallbackOne(Player player) {
                                     MainActivity.player = player;
                                     Intent intent = new Intent(LoginActivity.this, MainActivity.class);
                                     startActivity(intent);
+                                }
+
+                                @Override
+                                public void onCallbackMore(List<Player> players) {
+
                                 }
                             });
                         } else {

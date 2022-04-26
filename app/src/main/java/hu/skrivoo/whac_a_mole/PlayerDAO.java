@@ -1,8 +1,6 @@
 package hu.skrivoo.whac_a_mole;
 
-import android.annotation.SuppressLint;
 import android.content.Context;
-import android.util.Log;
 import android.widget.Toast;
 
 import com.google.android.gms.tasks.Task;
@@ -34,66 +32,41 @@ public class PlayerDAO {
     public void add(FirebaseUser user, FirestoreCallback firestoreCallback) {
         Player p = new Player(user.getDisplayName(), user.getPhotoUrl(), 0, new ArrayList<Integer>(), user.getUid());
         db.document(user.getUid()).set(p);
-        firestoreCallback.onCallback(p);
+        firestoreCallback.onCallbackOne(p);
     }
 
     public void get(FirebaseUser user, FirestoreCallback firestoreCallback) {
         DocumentReference docRef = db.document(user.getUid());
         docRef.get().addOnCompleteListener(task -> {
             if (task.isSuccessful() && task.getResult().exists()) {
-                firestoreCallback.onCallback(task.getResult().toObject(Player.class));
+                firestoreCallback.onCallbackOne(task.getResult().toObject(Player.class));
             } else {
                 add(user, firestoreCallback);
             }
         });
-
-
-
-
-                /*.addOnSuccessListener(
-                        documentSnapshot -> {
-                            if (documentSnapshot.exists()) {
-                                MainActivity.player = documentSnapshot.toObject(Player.class);
-                            } else {
-                                *//*String name = "";
-                                if (user.getDisplayName() == null || user.getDisplayName().equals(""))
-                                add(p).addOnSuccessListener(unused -> {
-                                    Toast.makeText(context, "Játékos létrehozva", Toast.LENGTH_LONG).show();
-                                }).addOnFailureListener(q -> {
-                                    Toast.makeText(context, "Player error: " + q.getMessage(), Toast.LENGTH_LONG).show();
-                                });*//*
-                            }
-                        })
-                .addOnFailureListener(e -> {
-                });*/
     }
 
-    public List<Player> getAll() {
+    public void getAll(FirestoreCallback firestoreCallback) {
         List<Player> players = new ArrayList<>();
         db.orderBy("name").get().addOnCompleteListener(task -> {
             for (QueryDocumentSnapshot ref : task.getResult()) {
                 players.add(ref.toObject(Player.class));
             }
+            firestoreCallback.onCallbackMore(players);
         });
-        return players;
     }
 
-    @SuppressLint("NotifyDataSetChanged")
-    public List<Player> getPlayersOrderByHighscore(int limitnum) {
-        List<Player> playerList = new ArrayList<>();
+    public void getTop10(FirestoreCallback firestoreCallback) {
+        List<Player> players = new ArrayList<>();
         db.orderBy("highestScore", Query.Direction.DESCENDING)
-                .limit(limitnum)
+                .limit(10)
                 .get()
                 .addOnCompleteListener(task -> {
-                    if (task.isSuccessful()) {
-                        for (QueryDocumentSnapshot qds : task.getResult()) {
-                            playerList.add(qds.toObject(Player.class));
-                        }
+                    for (QueryDocumentSnapshot ref : task.getResult()) {
+                        players.add(ref.toObject(Player.class));
                     }
-                }).addOnFailureListener(runnable -> {
-                    Log.e(LOG_TAG, runnable.getMessage());
-        });
-        return playerList;
+                    firestoreCallback.onCallbackMore(players);
+                });
     }
 
     public CollectionReference getRef() {
@@ -109,10 +82,10 @@ public class PlayerDAO {
 
     /**
      * @param currentUser Firebase user to use uid
-     * @param field the field to be updated
-     * @param value the new value of field.
-     *              If value is "-1" -> delete allScore
-     *              if value is "0" -> delete highestScore
+     * @param field       the field to be updated
+     * @param value       the new value of field.
+     *                    If value is "-1" -> delete allScore
+     *                    if value is "0" -> delete highestScore
      */
     public void update(FirebaseUser currentUser, String field, String value) {
         if (value.equals("-1")) {
