@@ -39,6 +39,8 @@ public class PlayerDAO {
                             if (documentSnapshot.exists()) {
                                 MainActivity.player = documentSnapshot.toObject(Player.class);
                             } else {
+                                String name = "";
+                                if (user.getDisplayName() == null || user.getDisplayName().equals(""))
                                 MainActivity.player = new Player(user.getDisplayName(), user.getPhotoUrl(), 0, new ArrayList<Integer>(), user.getUid());
                                 add(MainActivity.player).addOnSuccessListener(unused -> {
                                     Toast.makeText(context, "Játékos létrehozva", Toast.LENGTH_LONG).show();
@@ -81,6 +83,13 @@ public class PlayerDAO {
 
     public CollectionReference getRef() {
         return db;
+    }
+
+    /**
+     * Delete the users data from firestore database based on uid
+     */
+    public void delete(String uid, Context context) {
+        db.document(uid).delete().addOnCompleteListener(task -> Toast.makeText(context, "User sikeresen törölve.", Toast.LENGTH_LONG).show());
     }
 
 }

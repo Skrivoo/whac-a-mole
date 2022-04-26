@@ -14,4 +14,7 @@
     <string name="password_again">Jelszó újra</string>
     <string name="simple_login_text">Bejelentkezés</string>
     <string name="delete_registration">Regisztráció törlése</string>
+    <string name="profile">profile</string>
+    <string name="logout">kijelentkezés</string>
+    <string name="edit_profile">profil módosítása</string>
 </resources>

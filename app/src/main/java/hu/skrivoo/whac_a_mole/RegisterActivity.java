@@ -1,6 +1,7 @@
 package hu.skrivoo.whac_a_mole;
 
 import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
@@ -49,9 +50,11 @@ public class RegisterActivity extends AppCompatActivity {
                         if (task.isSuccessful()) {
                             Log.d(LOG_TAG, "createUserWithEmail:success");
                             FirebaseUser user = mAuth.getCurrentUser();
-                            Player p = new Player(emailText, user.getPhotoUrl(),
+                            String avatar = "https://www.sibberhuuske.nl/wp-content/uploads/2016/10/default-avatar-300x300.png";
+                            Player p = new Player(emailText, Uri.parse(avatar),
                                     0, new ArrayList<>(), user.getUid());
                             dao.add(p);
+                            MainActivity.player = p;
                             Intent intent = new Intent(RegisterActivity.this, MainActivity.class);
                             startActivity(intent);
                         } else {

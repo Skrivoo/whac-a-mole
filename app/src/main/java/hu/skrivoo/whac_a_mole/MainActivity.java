@@ -8,7 +8,6 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
@@ -38,7 +37,7 @@ public class MainActivity extends AppCompatActivity {
     private boolean showOneTapUI = true;
     private TextView isUserLoggedTextView;
     private SignInButton googleSignInButton;
-    public static Player player;
+    public static Player player = new Player();
     private PlayerDAO dao;
     private Button loginButton;
 
@@ -56,7 +55,7 @@ public class MainActivity extends AppCompatActivity {
         currentUser = firebaseAuth.getCurrentUser();
         dao = new PlayerDAO(this);
         if (currentUser != null) {
-            updateUI(currentUser);
+            updateUI();
         }
         signInRequest = BeginSignInRequest.builder()
                 .setPasswordRequestOptions(BeginSignInRequest.PasswordRequestOptions.builder()
@@ -75,6 +74,7 @@ public class MainActivity extends AppCompatActivity {
     private void getPlayerDataFromFirestore() {
         if (currentUser != null) {
             dao.get(currentUser);
+            updateUI();
         }
     }
 
@@ -91,11 +91,11 @@ public class MainActivity extends AppCompatActivity {
                             .addOnCompleteListener(this, task -> {
                                 if (task.isSuccessful()) {
                                     Log.d(LOG_TAG, "signInWithCredential:success");
-                                    FirebaseUser user = firebaseAuth.getCurrentUser();
-                                    updateUI(user);
+                                    currentUser = firebaseAuth.getCurrentUser();
+                                    updateUI();
                                 } else {
                                     Log.w(LOG_TAG, "signInWithCredential:failure", task.getException());
-                                    updateUI(null);
+                                    updateUI();
                                 }
                             });
                 }
@@ -107,9 +107,12 @@ public class MainActivity extends AppCompatActivity {
     }
 
     @SuppressLint("SetTextI18n")
-    private void updateUI(FirebaseUser user) {
-        if (user != null) {
-            isUserLoggedTextView.setText("Bejelentkezve, mint: " + user.getDisplayName());
+    private void updateUI() {
+        if (currentUser != null) {
+            if (player == null) {
+                dao.get(currentUser);
+            }
+            isUserLoggedTextView.setText("Bejelentkezve, mint: " + player.getName());
         } else {
             isUserLoggedTextView.setText("Nincs bejelentkezve");
         }
@@ -135,7 +138,7 @@ public class MainActivity extends AppCompatActivity {
         }
         currentUser = firebaseAuth.getCurrentUser();
         getPlayerDataFromFirestore();
-        updateUI(currentUser);
+        updateUI();
     }
 
     public void startGame(View view) {
@@ -152,10 +155,13 @@ public class MainActivity extends AppCompatActivity {
     @Override
     public void onStart() {
         super.onStart();
-        FirebaseUser currentUser = firebaseAuth.getCurrentUser();
-        if(currentUser != null){
-            updateUI(currentUser);
-        }
+        updateUI();
+    }
+
+    @Override
+    protected void onPostResume() {
+        super.onPostResume();
+        updateUI();
     }
 
     @Override
@@ -165,11 +171,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void startWithEmail(View view) {
-        if (currentUser != null) {
-            Toast.makeText(this, "Már be vagy jelentkezve", Toast.LENGTH_LONG).show();
-        } else {
-            Intent intent = new Intent(this, LoginActivity.class);
-            startActivity(intent);
-        }
+        Intent intent = new Intent(this, LoginActivity.class);
+        startActivity(intent);
     }
 }

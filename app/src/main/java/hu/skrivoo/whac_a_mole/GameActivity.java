@@ -45,6 +45,7 @@ public class GameActivity extends AppCompatActivity {
     private FirebaseUser currentUser;
     private Integer topScoreAtFireStore;
     private PlayerDAO playerDAO;
+    private boolean closed = false;
 
     @SuppressLint("ClickableViewAccessibility")
     @Override
@@ -74,23 +75,25 @@ public class GameActivity extends AppCompatActivity {
     }
 
     private void saveScoreNewMet() {
-        if (mAuth.getCurrentUser() != null) {
-            List<Integer> allScore = MainActivity.player.getScoreList();
-            allScore.add(Integer.parseInt(currentScore.getText().toString()));
-            MainActivity.player.setScoreList(allScore);
-            if (MainActivity.player.getHighestScore() < currentScoreNumber) {
-                MainActivity.player.setHighestScore(currentScoreNumber);
+        if (!closed) {
+            if (mAuth.getCurrentUser() != null) {
+                List<Integer> allScore = MainActivity.player.getScoreList();
+                allScore.add(Integer.parseInt(currentScore.getText().toString()));
+                MainActivity.player.setScoreList(allScore);
+                if (MainActivity.player.getHighestScore() < currentScoreNumber) {
+                    MainActivity.player.setHighestScore(currentScoreNumber);
+                }
+                playerDAO.add(MainActivity.player);
+            } else {
+                String topSaved = sharedPreferences.getString("topscore", "0");
+                if (Integer.parseInt(currentScore.getText().toString()) > Integer.parseInt(topSaved)) {
+                    SharedPreferences.Editor editor = sharedPreferences.edit();
+                    editor.putString("topscore", currentScoreNumber.toString());
+                    editor.apply();
+                }
             }
-            playerDAO.add(MainActivity.player);
-        } else {
-            String topSaved = sharedPreferences.getString("topscore", "0");
-            if (Integer.parseInt(currentScore.getText().toString()) > Integer.parseInt(topSaved)) {
-                SharedPreferences.Editor editor = sharedPreferences.edit();
-                editor.putString("topscore", currentScoreNumber.toString());
-                editor.apply();
-            }
+            finish();
         }
-        finish();
     }
 
     private void startGame() {
@@ -215,10 +218,16 @@ public class GameActivity extends AppCompatActivity {
     }
 
     @Override
+    protected void onStop() {
+        super.onStop();
+        closed = true;
+    }
+
+    @Override
     protected void onDestroy() {
+        super.onDestroy();
         cancelTimer();
         mp.release();
-        super.onDestroy();
     }
 
 }
