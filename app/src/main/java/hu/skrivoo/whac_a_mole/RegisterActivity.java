@@ -26,11 +26,13 @@ public class RegisterActivity extends AppCompatActivity {
     private EditText passwordAgain;
     private FirebaseAuth mAuth;
     private PlayerDAO dao;
+    private NotificationHandler notificationHandler;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         mAuth = FirebaseAuth.getInstance();
+        notificationHandler = new NotificationHandler(this);
         dao = new PlayerDAO(this);
         setContentView(R.layout.activity_register);
         email = findViewById(R.id.emailAddressReg);
@@ -55,6 +57,7 @@ public class RegisterActivity extends AppCompatActivity {
                                     0, new ArrayList<>(), user.getUid());
                             dao.add(p);
                             MainActivity.player = p;
+                            notificationHandler.sendNotification("It's time to play finally! :)");
                             Intent intent = new Intent(RegisterActivity.this, MainActivity.class);
                             startActivity(intent);
                         } else {

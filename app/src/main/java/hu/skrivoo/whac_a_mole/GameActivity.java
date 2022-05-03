@@ -46,6 +46,7 @@ public class GameActivity extends AppCompatActivity {
     private FirebaseUser currentUser;
     private Integer topScoreAtFireStore;
     private PlayerDAO playerDAO;
+    private NotificationHandler notificationHandler;
     private boolean closed = false;
 
     @SuppressLint("ClickableViewAccessibility")
@@ -64,11 +65,18 @@ public class GameActivity extends AppCompatActivity {
         Log.i(LOG_TAG, currentUser == null ? "anonim" : "bejelentkezve mint: " + currentUser.getDisplayName());
         db = FirebaseFirestore.getInstance();
         playerDAO = new PlayerDAO(this);
+        notificationHandler = new NotificationHandler(this);
         r = new Random();
         vibe = (Vibrator) getSystemService(VIBRATOR_SERVICE);
         mp = MediaPlayer.create(this, R.raw.oof);
         moles = initMoles();
+        notificationHandler.cancelNotification();
         startGame();
+    }
+
+
+    private void getPlayer(FirestoreCallback firestoreCallback) {
+        playerDAO.get(currentUser, firestoreCallback);
     }
 
     @RequiresApi(api = Build.VERSION_CODES.N)
