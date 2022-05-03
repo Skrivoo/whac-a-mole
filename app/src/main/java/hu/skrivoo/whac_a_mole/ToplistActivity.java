@@ -55,7 +55,7 @@ public class ToplistActivity extends AppCompatActivity {
     }
 
     private void changeQuery(View view) {
-        getAllPlayer(new FirestoreCallback() {
+        getPlayersByOneScore(new FirestoreCallback() {
             @Override
             public void onCallbackOne(Player player) {
             }
@@ -76,6 +76,12 @@ public class ToplistActivity extends AppCompatActivity {
 
     private void getAllPlayer(FirestoreCallback firestoreCallback) {
         dao.getAll(firestoreCallback);
+    }
+
+    //useless query a pontszámhoz
+    private void getPlayersByOneScore(FirestoreCallback firestoreCallback) {
+        //mondjuk minden user lekérése akinek van már 43 pontos eredménye és ezek listázása név szerint növekvően
+        dao.getUsersByOneScoreAndAscendingByName(firestoreCallback, 43);
     }
 
 }

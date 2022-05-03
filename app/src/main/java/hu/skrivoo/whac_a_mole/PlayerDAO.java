@@ -12,6 +12,7 @@ import com.google.firebase.firestore.Query;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 public class PlayerDAO {
@@ -54,6 +55,21 @@ public class PlayerDAO {
             }
             firestoreCallback.onCallbackMore(players);
         });
+    }
+
+
+    public void getUsersByOneScoreAndAscendingByName(FirestoreCallback firestoreCallback, int times) {
+        List<Player> players = new ArrayList<>();
+        db.orderBy("scoreList", Query.Direction.DESCENDING)
+                .whereArrayContainsAny("scoreList", Collections.singletonList(times))
+                .orderBy("name") //növekvő
+                .get()
+                .addOnCompleteListener(task -> {
+                    for (QueryDocumentSnapshot ref : task.getResult()) {
+                        players.add(ref.toObject(Player.class));
+                    }
+                    firestoreCallback.onCallbackMore(players);
+                });
     }
 
     public void getTop10(FirestoreCallback firestoreCallback) {
