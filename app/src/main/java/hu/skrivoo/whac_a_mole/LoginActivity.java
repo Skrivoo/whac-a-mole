@@ -111,7 +111,6 @@ public class LoginActivity extends AppCompatActivity {
 
                                 @Override
                                 public void onCallbackMore(List<Player> players) {
-
                                 }
                             });
                         } else {

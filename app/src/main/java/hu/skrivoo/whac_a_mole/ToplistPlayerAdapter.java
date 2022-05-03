@@ -17,13 +17,11 @@ import java.util.List;
 
 public class ToplistPlayerAdapter extends RecyclerView.Adapter<ToplistPlayerAdapter.ViewHolder> {
 
-    private List<Player> playerArrayList;
-    private List<Player> playerArrayListAll;
-    private Context context;
+    private final List<Player> playerArrayList;
+    private final Context context;
 
     ToplistPlayerAdapter(Context context, List<Player> playerList) {
         this.playerArrayList = playerList;
-        this.playerArrayListAll = playerList;
         this.context = context;
     }
 
@@ -46,10 +44,10 @@ public class ToplistPlayerAdapter extends RecyclerView.Adapter<ToplistPlayerAdap
 
     static class ViewHolder extends RecyclerView.ViewHolder {
 
-        private ImageView avatar;
-        private TextView nameOfPlayer;
-        private TextView higestScoreOfPlayer;
-        private TextView numberOfPlace;
+        private final ImageView avatar;
+        private final TextView nameOfPlayer;
+        private final TextView higestScoreOfPlayer;
+        private final TextView numberOfPlace;
 
         public ViewHolder(@NonNull View itemView) {
             super(itemView);

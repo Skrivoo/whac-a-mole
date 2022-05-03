@@ -17,7 +17,7 @@ import java.util.List;
 public class PlayerDAO {
 
     private static final String LOG_TAG = PlayerDAO.class.getName();
-    private CollectionReference db;
+    private final CollectionReference db;
     private Context context;
 
     public PlayerDAO(Context context) {

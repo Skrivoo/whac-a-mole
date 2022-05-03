@@ -16,7 +16,6 @@ import com.google.android.gms.auth.api.identity.BeginSignInRequest;
 import com.google.android.gms.auth.api.identity.Identity;
 import com.google.android.gms.auth.api.identity.SignInClient;
 import com.google.android.gms.auth.api.identity.SignInCredential;
-import com.google.android.gms.auth.api.signin.GoogleSignInClient;
 import com.google.android.gms.common.SignInButton;
 import com.google.android.gms.common.api.ApiException;
 import com.google.firebase.auth.AuthCredential;
@@ -31,11 +30,10 @@ public class MainActivity extends AppCompatActivity {
 
     private static final String LOG_TAG = MainActivity.class.getName();
     private FirebaseAuth firebaseAuth;
-    private GoogleSignInClient googleSignInClient;
     private SignInClient oneTapClient;
     private BeginSignInRequest signInRequest;
     private FirebaseUser currentUser;
-    private static final int REQ_ONE_TAP = 2;  // Can be any integer unique to the Activity.
+    private static final int REQ_ONE_TAP = 2;
     private boolean showOneTapUI = true;
     private TextView isUserLoggedTextView;
     private SignInButton googleSignInButton;

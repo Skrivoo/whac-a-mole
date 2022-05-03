@@ -42,7 +42,6 @@ public class ToplistActivity extends AppCompatActivity {
         getTop10Player(new FirestoreCallback() {
             @Override
             public void onCallbackOne(Player player) {
-
             }
 
             @SuppressLint("NotifyDataSetChanged")
@@ -59,7 +58,6 @@ public class ToplistActivity extends AppCompatActivity {
         getAllPlayer(new FirestoreCallback() {
             @Override
             public void onCallbackOne(Player player) {
-
             }
 
             @SuppressLint("NotifyDataSetChanged")

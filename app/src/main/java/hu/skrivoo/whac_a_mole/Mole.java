@@ -37,10 +37,6 @@ public class Mole {
         return moleView;
     }
 
-    public void setMoleView(ImageView moleView) {
-        this.moleView = moleView;
-    }
-
     public boolean isActive() {
         return active;
     }
